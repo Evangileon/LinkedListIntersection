@@ -69,20 +69,21 @@ public class LinkedListIntersection {
 	 * list, do nothing
 	 * 
 	 * @param list
-	 * @param n position of cycle point
+	 * @param n
+	 *            position of cycle point
 	 */
 	static void constructCycle(Node list, int n) {
 		Node node = list;
 		// find the target node to which the tail pointer
 		for (int i = 0; i < n; i++) {
-			if(node.next == null) {
+			if (node.next == null) {
 				return;
 			}
 			node = node.next;
 		}
 		// find the tail
 		Node tail = node;
-		while(tail.next != null) {
+		while (tail.next != null) {
 			tail = tail.next;
 		}
 		// connect
@@ -110,7 +111,7 @@ public class LinkedListIntersection {
 		while ((p.next != null || q.next != null)
 				&& (p.next != null || qCycle == false)
 				&& (q.next != null || pCycle == false)) {
-			//Node start = p;
+			Node start = p;
 			for (int i = 0; i < step; i++) {
 				if (p == q) {
 					return true;
@@ -119,9 +120,14 @@ public class LinkedListIntersection {
 					break;
 				}
 				p = p.next;
-				/*
-				 * if(p == start) { return false; }
-				 */
+
+				if (p == start) {
+					if(pCycle == true && qCycle == true) {
+						return false;
+					}
+					pCycle = true;
+					break; // current node in cycle
+				}
 			}
 			step <<= 1; // power of two
 			Node swap = p;
@@ -144,7 +150,7 @@ public class LinkedListIntersection {
 		// {length of list1, length of list2, length of appended to intersection
 		// point}
 		int[][] testCases = { { 1, 1, 1 }, { 1, 1, 2 }, { 1, 2, 2 },
-				{ 1, 3, 3 }, { 23, 34, 12 }, { 234, 8753, 1324 } };
+				{ 1, 3, 3 }, { 23, 34, 12 }, { 234, 873, 1324 } };
 
 		System.out
 				.println("Test case format: {length of list1, length of list2, length of appended to intersection point}}");
@@ -160,6 +166,11 @@ public class LinkedListIntersection {
 			insectionAtTailAndExtend(list1, list2, oneCase[2]);
 			System.out.print(Arrays.toString(oneCase));
 			System.out.println(" after intersected: "
+					+ doTheyMeet(list1, list2));
+			constructCycle(list1, 100);
+			insectionAtTailAndExtend(list1, list2, oneCase[2]);
+			System.out.print(Arrays.toString(oneCase));
+			System.out.println(" after construct cycle intersected: "
 					+ doTheyMeet(list1, list2));
 		}
 	}
