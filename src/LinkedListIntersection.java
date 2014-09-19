@@ -10,6 +10,10 @@ public class LinkedListIntersection {
 			data = 0;
 			next = null;
 		}
+		
+		public Node(int val) {
+			data = val;
+		}
 	}
 
 	/**
@@ -27,11 +31,19 @@ public class LinkedListIntersection {
 		Node root = new Node();
 		Node p = root;
 		for (int i = 1; i < length; i++) {
-			p.next = new Node();
+			p.next = new Node(i);
 			p = p.next;
 		}
 
 		return root;
+	}
+	
+	static void printList(Node list) {
+		while(list != null) {
+			System.out.print(list.data + " ");
+			list = list.next;
+		}
+		System.out.println();
 	}
 
 	/**
@@ -109,25 +121,30 @@ public class LinkedListIntersection {
 		boolean qCycle = false; // Does list2 have a cycle
 
 		while ((p.next != null || q.next != null)
-				&& (p.next != null || qCycle == false)
-				&& (q.next != null || pCycle == false)) {
+				&& (pCycle == false || qCycle == false)) {
 			Node start = p;
 			for (int i = 0; i < step; i++) {
+//				if (pCycle == true) {
+//					break;
+//				}
+
 				if (p == q) {
 					return true;
 				}
-				if (p.next == null) {
+				
+				if (p.next == null) { // Current list doesn't have a cycle
+					if(qCycle == true) {
+						return false; // If another list have a cycle, they must not have intersection
+					}
 					break;
 				}
-				p = p.next;
-
-				if (p == start) {
-					if(pCycle == true && qCycle == true) {
-						return false;
-					}
+				
+				if (p.next == start || pCycle == true) {
 					pCycle = true;
 					break; // current node in cycle
 				}
+				
+				p = p.next;				
 			}
 			step <<= 1; // power of two
 			Node swap = p;
@@ -141,38 +158,58 @@ public class LinkedListIntersection {
 		if (p == q) {
 			return true;
 		}
-
-		return false; // otherwise
+		
+		if(p.next == null && q.next == null) {
+			return false;
+		}
+		
+		// From now on, both lists have cycles, and p, q are in cycles
+		Node start = p;
+		while(true) {
+			p = p.next;
+			if(p == start) {
+				return false;
+			}
+			if(p == q) {
+				return true;
+			}
+		}
 	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		// {length of list1, length of list2, length of appended to intersection
 		// point}
-		int[][] testCases = { { 1, 1, 1 }, { 1, 1, 2 }, { 1, 2, 2 },
+		int[][] testCases = { {2, 3, 2}, { 1, 1, 1 }, { 1, 1, 2 }, { 1, 2, 2 },
 				{ 1, 3, 3 }, { 23, 34, 12 }, { 234, 873, 1324 } };
 
 		System.out
 				.println("Test case format: {length of list1, length of list2, length of appended to intersection point}}");
 
-		for (int[] oneCase : testCases) {
+		//for (int[] oneCase : testCases) {
 			// first test two lists before intersected
+		int[] oneCase = testCases[6];
 			Node list1 = buildList(oneCase[0]);
 			Node list2 = buildList(oneCase[1]);
 			System.out.print(Arrays.toString(oneCase));
 			System.out.println(" before intersected: "
 					+ doTheyMeet(list1, list2));
 			// after intersected
-			insectionAtTailAndExtend(list1, list2, oneCase[2]);
+			/*insectionAtTailAndExtend(list1, list2, oneCase[2]);
 			System.out.print(Arrays.toString(oneCase));
 			System.out.println(" after intersected: "
-					+ doTheyMeet(list1, list2));
-			constructCycle(list1, 100);
+					+ doTheyMeet(list1, list2));*/
+			
 			insectionAtTailAndExtend(list1, list2, oneCase[2]);
+			//printList(list1);
+			//printList(list2);
+			constructCycle(list1, 100);
+			//constructCycle(list2, 100);
 			System.out.print(Arrays.toString(oneCase));
+			boolean result = doTheyMeet(list1, list2);
 			System.out.println(" after construct cycle intersected: "
-					+ doTheyMeet(list1, list2));
-		}
+					+ result);
+		//}
 	}
 
 }
