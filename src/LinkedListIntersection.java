@@ -1,3 +1,44 @@
+/**
+ * @author Jun Yu
+ * @date 09/18/2014
+ */
+
+/**
+ * Description of Algorithm
+ * 
+ * Proceed two lists alternately by the steps of 2, 4, 8 ... (power of 2) sequence,
+ * In the process, store the last node accessed by previous run separately for two lists.
+ * While in iteration, check whether current node equals to stored node.
+ * Termination Condition: 1. Both lists reach the end if no cycles. 
+ * 						OR 2. One reach the end, while another one has a cycle
+ * 						OR 3. Acknowledged that both lists have cycles, and stored node in cycle,
+ * 							but can not find the stored node in another cycle. 
+ */
+
+/**
+ * Proof of Correctness
+ * 
+ * There are three case:
+ * 1. Neither lists have cycles
+ *    Stored node will stop at the end of the lists, if they equal, then two lists 
+ *    have intersection, otherwise no intersection
+ * 2. One have cycle, and another have no cycle
+ *    The stored will stop at the end of the one that have no cycle.
+ *    One acknowledges that another list has a cycle, they can't have intersection
+ * 3. Both lists have cycles
+ *    Search any node from one cycle on another cycle, if exists, then they have
+ *    intersection, otherwise(loop back to start point), no intersection.
+ */
+
+/**
+ * Running time = O(m1 + m2)
+ * Case 1:
+ *    In the case they don't meet, firstly, assume the length of list
+ *    after intersection point is infinite, 
+ * Case 2:
+ *    
+ */
+
 import java.util.Arrays;
 
 public class LinkedListIntersection {
@@ -119,98 +160,113 @@ public class LinkedListIntersection {
 		Node q = list2;
 		boolean pCycle = false; // Does list1 have a cycle
 		boolean qCycle = false; // Does list2 have a cycle
-
+		// while not both two lists ends
 		while ((p.next != null || q.next != null)) {
 			Node start = p;
 			for (int i = 0; i < step; i++) {
 				if (p == q) {
-					return true;
+					return true; // meet
 				}
 
-				if (p.next == null) { // Current list doesn't have a cycle
-					if (qCycle == true) { // If another list have a cycle, they
-											// can't have intersection
+				if (p.next == null) {
+					// Current list doesn't have a cycle
+					if (qCycle == true) {
+						// If another list have a cycle, they
+						// can't have intersection
 						return false;
 					}
-					break;
+					// p has no cycle and current p reaches the end of
+					// the list, no need to proceed in current list
+					break; 
 				}
 
-				if (p.next == start) {
-					if(pCycle == true && qCycle == true) {
-						return false;
+				if (p.next == start) { 
+					// p has traversed the whole cycle and
+					// back two starting point,
+					// also means list that p represents has a cycle
+					if (pCycle == true && qCycle == true) {
+						// If both p and q are already in cycles
+						// then q can not be found in p's cycle,
+						// that they have no intersection
+						return false; 
 					}
 					pCycle = true;
-					//break; // current node in cycle
 				}
 
 				p = p.next;
 			}
-			step <<= 1; // power of two
+			step <<= 1; // multiplied by 2
 			Node swap = p;
 			p = q;
-			q = swap;
+			q = swap; // swap p and q
 			boolean swapCycle = pCycle;
 			pCycle = qCycle;
-			qCycle = swapCycle;
+			qCycle = swapCycle; // swap the boolean variable corresponding to p
+								// and q
 		}
-
+		// From now on, neither two lists have cycle
 		if (p == q) { // meet
 			return true;
 		}
 
-//		if (p.next == null && q.next == null) { // p and q are two lists' tail,
-//												// but they don't meet
-//			return false;
-//		}
-//
-//		// From now on, both lists have cycles, and p, q are in cycles
-//		Node start = p;
-//		while (true) {
-//			p = p.next;
-//			if (p == start) {
-//				return false;
-//			}
-//			if (p == q) {
-//				return true;
-//			}
-//		}
-		return false;
+		return false; // otherwise
 	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		// {length of list1, length of list2, length of appended to intersection
-		// point}
-		int[][] testCases = { { 2, 3, 2 }, { 1, 1, 1 }, { 1, 1, 2 },
-				{ 1, 2, 2 }, { 1, 3, 3 }, { 23, 34, 12 }, { 234, 873, 1324 } };
+		// point, postion of cycle begin}
+		// Test
+		// 1. Test two lists with length case[0], case[1] respectively, without cycle or intersection.
+		// 2. Test two lists intersected at tail and append list with length case[2]
+		// 3. Test two lists intersected, and add cycle.
+		// 4. Test list1 have cycle, and two lists have no intersection
+		// 5  Test list2 have cycle, and two lists have no intersection
+		int[][] testCases = { { 2, 3, 2, 3 }, { 1, 1, 1, 0 }, { 1, 1, 2, 1 },
+				{ 1, 2, 2, 2 }, { 1, 3, 3, 0 }, { 23, 34, 12, 10 },
+				{ 234, 873, 1324, 1000 }, {1234,29, 1000, 2000} };
 
 		System.out
-				.println("Test case format: {length of list1, length of list2, length of appended to intersection point}}");
+				.println("Test case format: {length of list1, length of list2, length of appended to intersection point, postion of cycle begin}}");
 
-		// for (int[] oneCase : testCases) {
-		// first test two lists before intersected
-		int[] oneCase = testCases[6];
-		Node list1 = buildList(oneCase[0]);
-		Node list2 = buildList(oneCase[1]);
-		System.out.print(Arrays.toString(oneCase));
-		System.out.println(" before intersected: " + doTheyMeet(list1, list2));
-		// after intersected
-		/*
-		 * insectionAtTailAndExtend(list1, list2, oneCase[2]);
-		 * System.out.print(Arrays.toString(oneCase));
-		 * System.out.println(" after intersected: " + doTheyMeet(list1,
-		 * list2));
-		 */
+		for (int[] oneCase : testCases) {
+			// first test two lists before intersected
+			Node list1 = buildList(oneCase[0]);
+			Node list2 = buildList(oneCase[1]);
+			System.out.print(Arrays.toString(oneCase));
+			System.out.println(" before intersected, do they meet? "
+					+ doTheyMeet(list1, list2));
+			// after intersected
+			insectionAtTailAndExtend(list1, list2, oneCase[2]);
+			System.out.print(Arrays.toString(oneCase));
+			System.out.println(" after intersected, do they meet? "
+					+ doTheyMeet(list1, list2));
+			// constructCycle(list1, 100);
+			constructCycle(list2, oneCase[3]);
+			System.out.print(Arrays.toString(oneCase));
+			boolean result = doTheyMeet(list1, list2);
+			System.out
+					.println(" after construct cycle and intersected, do they meet? "
+							+ result);
 
-		//insectionAtTailAndExtend(list1, list2, oneCase[2]);
-		// printList(list1);
-		// printList(list2);
-		//constructCycle(list1, 100);
-		constructCycle(list2, 100);
-		System.out.print(Arrays.toString(oneCase));
-		boolean result = doTheyMeet(list1, list2);
-		System.out.println(" after construct cycle intersected: " + result);
-		// }
+			// rebuild
+			list1 = buildList(oneCase[0]);
+			list2 = buildList(oneCase[1]);
+			constructCycle(list1, oneCase[3]);
+			System.out.print(Arrays.toString(oneCase));
+			System.out
+					.println(" Only list1 has cycle, and not intersected with list2, do they meet? "
+							+ doTheyMeet(list1, list2));
+
+			// rebuild
+			list1 = buildList(oneCase[0]);
+			list2 = buildList(oneCase[1]);
+			constructCycle(list2, oneCase[3]);
+			System.out.print(Arrays.toString(oneCase));
+			System.out
+					.println(" Only list2 has cycle, and not intersected with list2, do they meet? "
+							+ doTheyMeet(list1, list2));
+		}
 	}
 
 }
